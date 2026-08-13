@@ -7,20 +7,32 @@ spec:
   template:
     spec:
       restartPolicy: Never
-      imagePullSecrets:
-      - name: gar-pull-${TEAM}
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
       - name: benchmark
-        image: ${GPU_IMAGE}
-        imagePullPolicy: Always
-        args: ["--run-name", "gpu-${TEAM}-${RUN_ID}", "--output-dir", "/results", "--epochs", "${EPOCHS}"]
+        # Lab 1's public, GH200 ARM64-verified runtime avoids private-registry
+        # imagePullSecrets, which the student RBAC persona cannot create.
+        image: nvcr.io/nvidia/jax:25.01-py3
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          mkdir -p /dev/shm/churn
+          cp /input/Churn_Dataset.csv /dev/shm/churn/Churn_Dataset.csv
+          exec python -u /code/train.py \
+            --data /dev/shm/churn/Churn_Dataset.csv \
+            --run-name gpu-${TEAM}-${RUN_ID} \
+            --output-dir /results \
+            --epochs ${EPOCHS}
         resources:
           requests: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
           limits: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
         volumeMounts:
         - {name: churn-data, mountPath: /input, readOnly: true}
+        - {name: churn-code, mountPath: /code, readOnly: true}
       volumes:
       - name: churn-data
         configMap: {name: churn-data-${TEAM}}
+      - name: churn-code
+        configMap: {name: churn-code-${TEAM}}
