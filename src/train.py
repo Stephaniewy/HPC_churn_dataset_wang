@@ -164,23 +164,28 @@ def sample_tpu(stop_event, samples, diagnostics):
     """Poll libtpu runtime metrics while the JAX workload is active."""
     # Duty cycle and HBM are required here. Some older libtpu runtimes reject
     # the whole request when the optional TensorCore metric is also included.
-    command = ["tpu-info", "--metric", "duty_cycle_percent", "hbm_usage"]
+    commands = [
+        ["tpu-info", "--metric", "duty_cycle_percent"],
+        ["tpu-info", "--metric", "hbm_usage"],
+    ]
     while not stop_event.is_set():
         try:
-            raw = subprocess.check_output(
-                command, text=True, stderr=subprocess.STDOUT, timeout=5)
-            diagnostics["command"] = command
+            raw = "\n".join(
+                subprocess.check_output(
+                    command, text=True, stderr=subprocess.STDOUT, timeout=5)
+                for command in commands)
+            diagnostics["commands"] = commands
             diagnostics["last_output"] = raw[-12000:]
             sample = parse_tpu_info(raw)
             if len(sample) > 1:
                 samples.append(sample)
         except subprocess.CalledProcessError as error:
-            diagnostics["command"] = command
+            diagnostics["commands"] = commands
             diagnostics["error"] = f"exit status {error.returncode}"
             diagnostics["last_output"] = (error.output or "")[-12000:]
             return
         except (FileNotFoundError, subprocess.TimeoutExpired, ValueError) as error:
-            diagnostics["command"] = command
+            diagnostics["commands"] = commands
             diagnostics["error"] = repr(error)
             return
         stop_event.wait(1.0)
