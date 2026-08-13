@@ -17,9 +17,10 @@ case "$target" in
 esac
 
 context=$(kubectl config current-context)
-case "$target:$context" in
-  gpu:*stanford-pilot*) ;;
-  gpu:*) echo "Refusing GPU submission from context '$context'; expected stanford-pilot" >&2; exit 1 ;;
+cluster=$(kubectl config view --minify -o jsonpath='{.contexts[0].context.cluster}')
+case "$target:$cluster" in
+  gpu:stanford-pilot) ;;
+  gpu:*) echo "Refusing GPU submission from context '$context' (cluster '$cluster'); expected stanford-pilot cluster" >&2; exit 1 ;;
   tpu:gke_${PROJECT}_us-west4_class-tpu-cluster-west4) ;;
   tpu:*) echo "Refusing TPU submission from context '$context'; expected west4 course GKE context" >&2; exit 1 ;;
   cpu:*) ;;

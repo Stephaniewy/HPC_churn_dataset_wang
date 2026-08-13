@@ -71,7 +71,7 @@ scripts/run_cpu.sh benchmark
 ### 2. GH200 GPU
 
 ```bash
-kubectl config use-context stanford-pilot
+kubectl config use-context student58-context
 export KUBE_NAMESPACE=ns-student58
 scripts/create_configmap.sh
 scripts/build_images.sh gpu
