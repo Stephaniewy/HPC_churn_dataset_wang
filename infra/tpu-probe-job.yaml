@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: churn-tpu-probe-${TEAM}
+  labels:
+    kueue.x-k8s.io/queue-name: student-queue
+spec:
+  activeDeadlineSeconds: 900
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        cloud.google.com/gke-tpu-accelerator: tpu-v5-lite-podslice
+        cloud.google.com/gke-tpu-topology: 2x4
+      containers:
+      - name: probe
+        image: us-docker.pkg.dev/cloud-tpu-images/jax-ai-image/tpu:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-c"]
+        args:
+        - |
+          import platform
+          import jax, numpy
+          print("architecture=", platform.machine())
+          print("jax_version=", jax.__version__)
+          print("numpy_version=", numpy.__version__)
+          print("jax_device_count=", jax.device_count())
+          print("jax_devices=", jax.devices())
+        resources:
+          requests: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
+          limits: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
