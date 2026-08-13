@@ -1,0 +1,50 @@
+name: Publish GH200 GPU image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile.gpu
+      - src/**
+      - scripts/container_entrypoint.sh
+      - .github/workflows/publish-gpu-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/stephaniewy/hpc_churn_dataset_wang-gpu
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish ARM64 image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.gpu
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.description=ME344 JAX churn benchmark for NVIDIA GH200 ARM64
