@@ -44,7 +44,7 @@ chmod +x scripts/*.sh
 
 ### Build images
 
-Build one target at a time. If your account still has the Cloud Build permission error seen in Lab 2, stop there and ask the course staff to grant the documented build access or provide the course-approved build route; do not install packages manually on a running Pod.
+Build one target at a time. The TPU image follows Lab 2's course-approved local Podman build and Artifact Registry push route; do not install packages manually on a running Pod.
 
 ```bash
 scripts/build_images.sh cpu
@@ -53,7 +53,7 @@ scripts/build_images.sh gpu
 scripts/build_images.sh tpu
 ```
 
-The last command creates an ARM64 image for the GH200. Before using it, compare it with Lab 1’s verified `stanford-pilot` image-pull method. If Lab 1 uses a different registry or architecture procedure, retain this project’s `gpu-job.yaml` but substitute that known-good image build/push command.
+The GPU command creates a no-`RUN` ARM64 overlay on NVIDIA's JAX image for the GH200, following Lab 1's verified `stanford-pilot` Job and image-pull model. The TPU command builds an x86_64 JAX/libtpu image on the class server following Lab 2.
 
 ## Run the three comparable benchmarks
 

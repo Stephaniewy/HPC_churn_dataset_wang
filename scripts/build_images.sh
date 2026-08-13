@@ -14,9 +14,12 @@ case "$target" in
       --substitutions="_IMAGE=${REPO}/churn-cpu-${TEAM}:latest" .
     ;;
   tpu)
-    command -v gcloud >/dev/null || { echo "gcloud is required" >&2; exit 1; }
-    gcloud builds submit --config infra/cloudbuild-tpu.yaml \
-      --substitutions="_IMAGE=${REPO}/churn-tpu-${TEAM}:latest" .
+    command -v docker >/dev/null || { echo "Docker-compatible Podman is required" >&2; exit 1; }
+    docker build \
+      --build-arg 'JAX_PACKAGE=jax[tpu]==0.6.2' \
+      --build-arg 'JAX_FIND_LINKS=https://storage.googleapis.com/jax-releases/libtpu_releases.html' \
+      -t "${REPO}/churn-tpu-${TEAM}:latest" .
+    docker push "${REPO}/churn-tpu-${TEAM}:latest"
     ;;
   gpu)
     command -v docker >/dev/null || { echo "docker with buildx is required" >&2; exit 1; }

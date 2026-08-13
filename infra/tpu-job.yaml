@@ -12,6 +12,7 @@ spec:
       nodeSelector:
         cloud.google.com/gke-tpu-accelerator: tpu-v5-lite-podslice
         cloud.google.com/gke-tpu-topology: 2x4
+        topology.kubernetes.io/zone: us-west4-a
       containers:
       - name: benchmark
         image: ${TPU_IMAGE}
