@@ -1,10 +1,12 @@
 # ME344 Option 1 — Portable Churn DNN Benchmark
 
+## Executive summary
+
 This repository packages a JAX/XLA multi-layer perceptron (16 input features → 64 → 32 → 1) for telecom churn classification. The same model, seed, 70/15/15 stratified split, 200 epochs, and batch size run on three distinct resources: the assigned CPU node, the `stanford-pilot` GH200 GPU, and the GKE `tpu-v5-lite-podslice` 2x4 TPU v5e slice.
 
 The submitted benchmark is deliberately small (5,000 data rows plus a CSV header), so accelerator compilation and host-to-device transfer can be an important fraction of total latency. The project separately records cold-start/XLA compilation time and steady-state training step time.
 
-## System topology
+## System topology diagram
 
 ```mermaid
 flowchart TD
@@ -99,7 +101,7 @@ kubectl delete job churn-tpu-${TEAM}-<RUN_ID>
 
 The TPU Job requests `google.com/tpu: 8`, selector `tpu-v5-lite-podslice`, topology `2x4`, and the required `student-queue` label. `ADMITTED: True` with a Pending pod is normal while Autopilot starts the TPU node.
 
-## Final measured results
+## Performance delta analysis
 
 Every run emits JSON and CSV records. `scripts/summarize_results.py` rebuilds the final comparison and charts directly from the three selected 200-epoch JSON artifacts:
 
@@ -129,9 +131,11 @@ The formal GPU Job used the public immutable GHCR image `ghcr.io/stephaniewy/hpc
 
 Input processing was not the bottleneck: data loading took 0.0593 s on CPU, 0.0355 s on GPU, and 0.0367 s on TPU; device transfer took 0.0016 s, 0.0082 s, and 0.0044 s respectively. The ConfigMap is copied into `/dev/shm` before training, keeping the timed loop independent of network or control-plane storage latency.
 
-## Bottleneck hypothesis and mitigation
+## Infrastructure bottleneck diagnosis
 
 The measured bottleneck is workload size rather than accelerator capacity. The 5,000-row, 16-feature MLP does too little matrix work per step to amortize accelerator dispatch and synchronization. CPU training was 3.12x faster than GH200 training and 1.42x faster than the eight-chip TPU; CPU end-to-end time was also lowest. The GH200's 1% mean utilization and the TPU's 2.50% mean duty cycle reinforce the underutilization diagnosis.
+
+## Engineering mitigations
 
 For this telecom churn workload, the assigned CPU is the practical deployment and periodic-retraining choice: it is fastest here and avoids reserving scarce accelerators. GPU or TPU becomes defensible only after materially increasing model width, dataset size, batch size, retraining frequency, or concurrent workload volume. Predictive feasibility also needs business validation: accuracy alone can hide minority-class errors, while ROC-AUC near 0.69 indicates only moderate ranking quality. A production retention workflow should select a decision threshold using false-positive offer cost, false-negative churn loss, calibration, and drift monitoring.
 
