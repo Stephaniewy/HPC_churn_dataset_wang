@@ -1,3 +1,4 @@
+-----BEGIN BENCHMARK JSON-----
 {
   "run_name": "cpu-ways-58-docker-check",
   "dataset_rows": 5000,
@@ -5,17 +6,17 @@
   "epochs": 1,
   "batch_size": 256,
   "steps": 13,
-  "compile_seconds": 0.30454678810201585,
-  "data_loading_seconds": 0.03125202679075301,
-  "device_transfer_seconds": 0.001647443976253271,
-  "training_seconds": 0.34193712403066456,
-  "mean_step_ms": 26.278427425915233,
-  "p95_step_ms": 127.71230582147791,
-  "steps_per_second": 38.018685560548185,
-  "measured_end_to_end_seconds": 1.7402367531321943,
-  "validation_accuracy": 0.26266666666666666,
-  "test_accuracy": 0.2786666666666667,
-  "test_roc_auc": 0.5891538731981718,
+  "compile_seconds": 0.23347356799058616,
+  "data_loading_seconds": 0.060427017044276,
+  "device_transfer_seconds": 0.001584324985742569,
+  "training_seconds": 0.3114019928034395,
+  "mean_step_ms": 23.930395093674843,
+  "p95_step_ms": 116.70864382758695,
+  "steps_per_second": 41.746682103623364,
+  "measured_end_to_end_seconds": 1.6859736549668014,
+  "validation_accuracy": 0.27066666666666667,
+  "test_accuracy": 0.2733333333333333,
+  "test_roc_auc": 0.61862768076878,
   "telemetry": {
     "visible_devices": [
       "TFRT_CPU_0"
@@ -24,11 +25,16 @@
     "platform": "Linux-5.14.0-503.14.1.el9_5.x86_64-x86_64-with-glibc2.41",
     "jax_version": "0.6.2",
     "cpu_affinity_count": 32,
-    "process_cpu_seconds": 3.6670203179999987,
-    "process_cpu_utilization_percent": 6.584988205268354,
-    "peak_host_rss_mib": 428.53125,
+    "process_cpu_seconds": 2.8034064260000005,
+    "process_cpu_utilization_percent": 5.196193342310861,
+    "peak_host_rss_mib": 310.31640625,
     "gpu_sample_interval_seconds": 0.5,
     "gpu_samples": [],
     "gpu_sampling": "nvidia-smi not available"
   }
 }
+-----END BENCHMARK JSON-----
+-----BEGIN BENCHMARK CSV-----
+run_name,dataset_rows,features,epochs,batch_size,steps,compile_seconds,data_loading_seconds,device_transfer_seconds,training_seconds,mean_step_ms,p95_step_ms,steps_per_second,measured_end_to_end_seconds,validation_accuracy,test_accuracy,test_roc_auc,devices
+cpu-ways-58-docker-check,5000,16,1,256,13,0.23347356799058616,0.060427017044276,0.001584324985742569,0.3114019928034395,23.930395093674843,116.70864382758695,41.746682103623364,1.6859736549668014,0.27066666666666667,0.2733333333333333,0.61862768076878,TFRT_CPU_0
+-----END BENCHMARK CSV-----

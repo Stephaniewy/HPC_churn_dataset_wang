@@ -1,0 +1,34 @@
+{
+  "run_name": "cpu-ways-58-20260813-070716",
+  "dataset_rows": 5000,
+  "features": 16,
+  "epochs": 200,
+  "batch_size": 256,
+  "steps": 2600,
+  "compile_seconds": 0.2317817269358784,
+  "data_loading_seconds": 0.05933354306034744,
+  "device_transfer_seconds": 0.0016229469329118729,
+  "training_seconds": 4.96913944510743,
+  "mean_step_ms": 1.8965754246948143,
+  "p95_step_ms": 1.8277724389918146,
+  "steps_per_second": 523.2294301098627,
+  "measured_end_to_end_seconds": 6.36312074190937,
+  "validation_accuracy": 0.8706666666666667,
+  "test_accuracy": 0.86,
+  "test_roc_auc": 0.6930153521621938,
+  "telemetry": {
+    "visible_devices": [
+      "TFRT_CPU_0"
+    ],
+    "device_count": 1,
+    "platform": "Linux-5.14.0-503.14.1.el9_5.x86_64-x86_64-with-glibc2.41",
+    "jax_version": "0.6.2",
+    "cpu_affinity_count": 32,
+    "process_cpu_seconds": 7.604702232999999,
+    "process_cpu_utilization_percent": 3.734754602659633,
+    "peak_host_rss_mib": 308.5078125,
+    "gpu_sample_interval_seconds": 0.5,
+    "gpu_samples": [],
+    "gpu_sampling": "nvidia-smi not available"
+  }
+}

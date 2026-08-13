@@ -104,13 +104,13 @@ Every run emits JSON and appends a row to `benchmark_summary.csv`. Record these 
 
 | Hardware | Compile seconds | Mean step ms | P95 step ms | Steps/s | Test accuracy | Test ROC-AUC | Utilization evidence |
 |---|---:|---:|---:|---:|---:|---:|---|
-| Assigned CPU node | 0.3202 | 2.2956 | 2.2103 | 431.27 | 0.8667 | 0.7103 | 32 logical CPUs visible; 3.98% of node CPU capacity averaged; 431.54 MiB peak RSS |
+| Assigned CPU node | 0.2318 | 1.8966 | 1.8278 | 523.23 | 0.8600 | 0.6930 | 32 logical CPUs visible; 3.73% of node CPU capacity averaged; 308.51 MiB peak RSS |
 | GH200 | pending | pending | pending | pending | pending | pending | `nvidia-smi` captured in JSON |
 | TPU v5e (8 chips) | pending | pending | pending | pending | pending | pending | `tpu-info --streaming --rate 2` screenshot/log |
 
 The deterministic split means predictive metrics should be close across devices. If they are not, record the mismatch instead of silently comparing different runs.
 
-The CPU figure above is the measured 200-epoch run `cpu-ways-58-20260813-062851`. Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.27 logical cores on average (3.98% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run.
+The CPU figure above is the final portable NumPy-pipeline 200-epoch run `cpu-ways-58-20260813-070716`. Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.20 logical cores on average (3.73% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run. The earlier `062851` run used the superseded sklearn preprocessing pipeline and is excluded from the comparison table.
 
 ## Bottleneck hypothesis and mitigation
 
