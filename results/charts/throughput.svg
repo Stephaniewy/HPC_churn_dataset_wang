@@ -19,7 +19,7 @@
 <rect x="410.0" y="322.4" width="150" height="92.6" rx="5" fill="#16A34A"/>
 <text x="485.0" y="312.4" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#111827">167.84</text>
 <text x="485.0" y="445" text-anchor="middle" font-family="Arial" font-size="14" fill="#374151">NVIDIA GH200</text>
-<rect x="635.0" y="196.6" width="150" height="218.4" rx="5" fill="#9333EA"/>
-<text x="710.0" y="186.6" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#111827">395.63</text>
+<rect x="635.0" y="211.3" width="150" height="203.7" rx="5" fill="#9333EA"/>
+<text x="710.0" y="201.3" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#111827">369.12</text>
 <text x="710.0" y="445" text-anchor="middle" font-family="Arial" font-size="14" fill="#374151">TPU v5e 2x4</text>
 </svg>

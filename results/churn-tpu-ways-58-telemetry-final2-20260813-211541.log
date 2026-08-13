@@ -1,0 +1,168 @@
+-----BEGIN BENCHMARK JSON-----
+{
+  "run_name": "tpu-ways-58-telemetry-final2-20260813-211541",
+  "dataset_rows": 5000,
+  "features": 16,
+  "epochs": 200,
+  "batch_size": 256,
+  "steps": 2600,
+  "compile_seconds": 0.17535579199999773,
+  "data_loading_seconds": 0.0367131380000032,
+  "device_transfer_seconds": 0.004364420999998231,
+  "training_seconds": 7.043750126999996,
+  "mean_step_ms": 2.6982306380770313,
+  "p95_step_ms": 2.748249050008411,
+  "steps_per_second": 369.1215550128219,
+  "measured_end_to_end_seconds": 12.320940206000003,
+  "validation_accuracy": 0.8706666666666667,
+  "test_accuracy": 0.8586666666666667,
+  "test_roc_auc": 0.6933815774053674,
+  "telemetry": {
+    "visible_devices": [
+      "TPU_0(process=0,(0,0,0,0))",
+      "TPU_1(process=0,(1,0,0,0))",
+      "TPU_2(process=0,(0,1,0,0))",
+      "TPU_3(process=0,(1,1,0,0))",
+      "TPU_4(process=0,(0,2,0,0))",
+      "TPU_5(process=0,(1,2,0,0))",
+      "TPU_6(process=0,(0,3,0,0))",
+      "TPU_7(process=0,(1,3,0,0))"
+    ],
+    "device_count": 8,
+    "platform": "Linux-6.12.85+-x86_64-with-glibc2.41",
+    "jax_version": "0.6.2",
+    "cpu_affinity_count": 224,
+    "process_cpu_seconds": 24.877334472999998,
+    "process_cpu_utilization_percent": 0.9013884252375324,
+    "peak_host_rss_mib": 6563.640625,
+    "gpu_sample_interval_seconds": 0.5,
+    "gpu_samples": [],
+    "tpu_sample_interval_seconds": 1.0,
+    "tpu_samples": [
+      {
+        "timestamp_seconds": 1786655889.5687127,
+        "duty_cycle_percent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_used_gib": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_total_gib": [
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75
+        ]
+      },
+      {
+        "timestamp_seconds": 1786655892.9480875,
+        "duty_cycle_percent": [
+          30.05,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_used_gib": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_total_gib": [
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75
+        ]
+      },
+      {
+        "timestamp_seconds": 1786655896.3378055,
+        "duty_cycle_percent": [
+          30.05,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_used_gib": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "hbm_total_gib": [
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75,
+          15.75
+        ]
+      }
+    ],
+    "tpu_info_diagnostics": {
+      "commands": [
+        [
+          "tpu-info",
+          "--metric",
+          "duty_cycle_percent"
+        ],
+        [
+          "tpu-info",
+          "--metric",
+          "hbm_usage"
+        ]
+      ],
+      "last_output": "TPU Duty Cycle              \n                            \n| Core ID | Duty Cycle (%) |\n|---------|----------------|\n| 0       | 30.05%         |\n| 1       | 0.00%          |\n| 2       | 0.00%          |\n| 3       | 0.00%          |\n| 4       | 0.00%          |\n| 5       | 0.00%          |\n| 6       | 0.00%          |\n| 7       | 0.00%          |\n                            \n\nTPU HBM Usage                    \n                                 \n| Device | HBM Usage (GiB)      |\n|--------|----------------------|\n| 0      | 0.00 GiB / 15.75 GiB |\n| 1      | 0.00 GiB / 15.75 GiB |\n| 2      | 0.00 GiB / 15.75 GiB |\n| 3      | 0.00 GiB / 15.75 GiB |\n| 4      | 0.00 GiB / 15.75 GiB |\n| 5      | 0.00 GiB / 15.75 GiB |\n| 6      | 0.00 GiB / 15.75 GiB |\n| 7      | 0.00 GiB / 15.75 GiB |\n                                 \n"
+    },
+    "gpu_sampling": "nvidia-smi not available",
+    "tpu_mean_duty_cycle_percent": 2.504166666666667,
+    "tpu_peak_duty_cycle_percent": 30.05,
+    "tpu_peak_hbm_used_gib": 0.0,
+    "tpu_hbm_total_gib_per_chip": 15.75
+  }
+}
+-----END BENCHMARK JSON-----
+-----BEGIN BENCHMARK CSV-----
+run_name,dataset_rows,features,epochs,batch_size,steps,compile_seconds,data_loading_seconds,device_transfer_seconds,training_seconds,mean_step_ms,p95_step_ms,steps_per_second,measured_end_to_end_seconds,validation_accuracy,test_accuracy,test_roc_auc,devices
+tpu-ways-58-telemetry-final2-20260813-211541,5000,16,200,256,2600,0.17535579199999773,0.0367131380000032,0.004364420999998231,7.043750126999996,2.6982306380770313,2.748249050008411,369.1215550128219,12.320940206000003,0.8706666666666667,0.8586666666666667,0.6933815774053674,"TPU_0(process=0,(0,0,0,0)); TPU_1(process=0,(1,0,0,0)); TPU_2(process=0,(0,1,0,0)); TPU_3(process=0,(1,1,0,0)); TPU_4(process=0,(0,2,0,0)); TPU_5(process=0,(1,2,0,0)); TPU_6(process=0,(0,3,0,0)); TPU_7(process=0,(1,3,0,0))"
+-----END BENCHMARK CSV-----

@@ -111,7 +111,7 @@ python3 scripts/summarize_results.py
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Assigned CPU node | 0.2318 | 4.9691 | 6.3631 | 1.8966 | 1.8278 | 523.23 | 0.8600 | 0.6930 |
 | NVIDIA GH200 | 0.5377 | 15.4911 | 18.8684 | 5.9199 | 12.4933 | 167.84 | 0.8640 | 0.6228 |
-| TPU v5e 2x4 (8 chips) | 0.1769 | 6.5718 | 12.7164 | 2.5173 | 2.5401 | 395.63 | 0.8587 | 0.6934 |
+| TPU v5e 2x4 (8 chips) | 0.1754 | 7.0438 | 12.3209 | 2.6982 | 2.7482 | 369.12 | 0.8587 | 0.6934 |
 
 ![Training time comparison](results/charts/training_time.svg)
 
@@ -121,15 +121,17 @@ python3 scripts/summarize_results.py
 
 The deterministic split makes the CPU and TPU predictive metrics nearly identical. The GH200 run reached similar accuracy but lower ROC-AUC; that observed mismatch is retained rather than replaced or normalized away. JAX versions also differed: CPU and TPU used 0.6.2, while the course NVIDIA runtime supplied `0.4.38.dev20250115+838500378`.
 
-The selected artifacts are `cpu-ways-58-20260813-070716`, `churn-gpu-ways-58-20260813-074833`, and `churn-tpu-ways-58-verify-20260813-075510`. The TPU filename says `verify`, but the older server-side manifest omitted the epoch override, so the immutable image executed its default 200 epochs and 2,600 steps. The complete run is retained as the formal TPU measurement; the corrected repository manifest now forwards `EPOCHS`.
+The selected artifacts are `cpu-ways-58-20260813-070716`, `churn-gpu-ways-58-20260813-074833`, and `churn-tpu-ways-58-telemetry-final2-20260813-211541`. Each executed 200 epochs and 2,600 timed steps with the same seed, split, batch size, float32 model, and preprocessing path. Validation and failed telemetry checks are retained only as raw debugging evidence and are excluded from the three-row comparison.
 
 Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.20 logical cores on average (3.73% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run. The earlier `062851` run used the superseded sklearn preprocessing pipeline and is excluded.
 
-The formal GPU Job used the public immutable GHCR image `ghcr.io/stephaniewy/hpc_churn_dataset_wang-gpu@sha256:c4ff36e4f45a8fe2f7455f35c5fccbf0f80510505ad9ca1b2217c18cfeb22882`. With JAX preallocation disabled, sampled GPU utilization averaged 1%, peaked at 2%, and peak allocated GPU memory was approximately 650 MiB. The formal TPU Pod used `us-central1-docker.pkg.dev/soe-hpccenter/tpu-images/churn-tpu-ways-58@sha256:cab5d618d437a99c58ed8411ba09366e37a43d3225c2b659cf76d643eb04cdf4` and exposed all eight expected devices. The TPU container did not provide an accelerator-utilization sampler, so this project reports device topology and host telemetry but does not claim a TPU utilization percentage.
+The formal GPU Job used the public immutable GHCR image `ghcr.io/stephaniewy/hpc_churn_dataset_wang-gpu@sha256:c4ff36e4f45a8fe2f7455f35c5fccbf0f80510505ad9ca1b2217c18cfeb22882`. With JAX preallocation disabled, `nvidia-smi` samples averaged 1% GPU utilization, peaked at 2%, and reported 650 MiB peak VRAM. The formal TPU Pod used `us-central1-docker.pkg.dev/soe-hpccenter/tpu-images/churn-tpu-ways-58@sha256:d39d82614c25dbdfbc85a56c3fb2e27f4856130dc7da2bd463b591f19f751f6c` and exposed all eight expected devices. Automated `tpu-info` samples averaged 2.50% duty cycle and peaked at 30.05%; only core 0 registered nonzero work in the final sample, which demonstrates that this implementation did not shard the small MLP across the eight-chip slice. `tpu-info` reported 0.00 GiB used of 15.75 GiB HBM per device. That value is preserved as observed but treated as a runtime sampling limitation—not as proof that training allocated no accelerator memory.
+
+Input processing was not the bottleneck: data loading took 0.0593 s on CPU, 0.0355 s on GPU, and 0.0367 s on TPU; device transfer took 0.0016 s, 0.0082 s, and 0.0044 s respectively. The ConfigMap is copied into `/dev/shm` before training, keeping the timed loop independent of network or control-plane storage latency.
 
 ## Bottleneck hypothesis and mitigation
 
-The measured bottleneck is workload size rather than accelerator capacity. The 5,000-row, 16-feature MLP does too little matrix work per step to amortize accelerator dispatch and synchronization. CPU training was 3.12x faster than GH200 training and 1.32x faster than the eight-chip TPU; CPU end-to-end time was also lowest. The GH200's 1% mean sampled utilization and 650 MiB peak memory reinforce the underutilization diagnosis.
+The measured bottleneck is workload size rather than accelerator capacity. The 5,000-row, 16-feature MLP does too little matrix work per step to amortize accelerator dispatch and synchronization. CPU training was 3.12x faster than GH200 training and 1.42x faster than the eight-chip TPU; CPU end-to-end time was also lowest. The GH200's 1% mean utilization and the TPU's 2.50% mean duty cycle reinforce the underutilization diagnosis.
 
 For this telecom churn workload, the assigned CPU is the practical deployment and periodic-retraining choice: it is fastest here and avoids reserving scarce accelerators. GPU or TPU becomes defensible only after materially increasing model width, dataset size, batch size, retraining frequency, or concurrent workload volume. Predictive feasibility also needs business validation: accuracy alone can hide minority-class errors, while ROC-AUC near 0.69 indicates only moderate ranking quality. A production retention workflow should select a decision threshold using false-positive offer cost, false-negative churn loss, calibration, and drift monitoring.
 

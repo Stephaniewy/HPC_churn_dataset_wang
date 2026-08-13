@@ -13,7 +13,7 @@ CHARTS = RESULTS / "charts"
 RUNS = [
     ("Assigned CPU node", "cpu-ways-58-20260813-070716.json", "TFRT_CPU_0"),
     ("NVIDIA GH200", "churn-gpu-ways-58-20260813-074833.json", "cuda:0"),
-    ("TPU v5e 2x4", "churn-tpu-ways-58-verify-20260813-075510.json", "8 TPU devices"),
+    ("TPU v5e 2x4", "churn-tpu-ways-58-telemetry-final2-20260813-211541.json", "8 TPU devices"),
 ]
 FIELDS = [
     "platform", "run_name", "dataset_rows", "features", "epochs", "batch_size",
@@ -21,6 +21,9 @@ FIELDS = [
     "training_seconds", "mean_step_ms", "p95_step_ms", "steps_per_second",
     "measured_end_to_end_seconds", "validation_accuracy", "test_accuracy",
     "test_roc_auc", "device_count", "jax_version", "devices",
+    "process_cpu_utilization_percent", "peak_host_rss_mib",
+    "accelerator_mean_utilization_percent", "accelerator_peak_utilization_percent",
+    "accelerator_peak_memory", "accelerator_memory_unit",
 ]
 
 
@@ -37,6 +40,21 @@ def load_runs():
             device_count=telemetry["device_count"],
             jax_version=telemetry["jax_version"],
             devices=device_label,
+            process_cpu_utilization_percent=telemetry.get("process_cpu_utilization_percent"),
+            peak_host_rss_mib=telemetry.get("peak_host_rss_mib"),
+            accelerator_mean_utilization_percent=telemetry.get(
+                "gpu_mean_utilization_percent",
+                telemetry.get("tpu_mean_duty_cycle_percent")),
+            accelerator_peak_utilization_percent=telemetry.get(
+                "gpu_peak_utilization_percent",
+                telemetry.get("tpu_peak_duty_cycle_percent")),
+            accelerator_peak_memory=telemetry.get(
+                "gpu_peak_memory_used_mib",
+                telemetry.get("tpu_peak_hbm_used_gib")),
+            accelerator_memory_unit=(
+                "MiB VRAM" if "gpu_peak_memory_used_mib" in telemetry
+                else "GiB HBM (tpu-info reported)" if "tpu_peak_hbm_used_gib" in telemetry
+                else "MiB host RSS"),
         )
         if row["epochs"] != 200 or row["steps"] != 2600:
             raise ValueError(f"{filename} is not a comparable 200-epoch run")
