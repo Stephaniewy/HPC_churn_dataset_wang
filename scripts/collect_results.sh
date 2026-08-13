@@ -18,9 +18,27 @@ sed -n '/^-----BEGIN BENCHMARK CSV-----$/,/^-----END BENCHMARK CSV-----$/p' "res
   | sed '1d;$d' > "results/${job}.csv"
 
 python3 -m json.tool "results/${job}.json" >/dev/null
-if [ ! -s results/benchmark_summary.csv ]; then
-  cp "results/${job}.csv" results/benchmark_summary.csv
-else
-  tail -n +2 "results/${job}.csv" >> results/benchmark_summary.csv
-fi
+python3 - "results/${job}.csv" results/benchmark_summary.csv <<'PY'
+import csv
+import sys
+from pathlib import Path
+
+run_path, summary_path = map(Path, sys.argv[1:])
+with run_path.open(newline="") as f:
+    run_row = next(csv.DictReader(f))
+prior = []
+fields = list(run_row)
+if summary_path.exists() and summary_path.stat().st_size:
+    with summary_path.open(newline="") as f:
+        reader = csv.DictReader(f)
+        prior = [row for row in reader if row.get("run_name") != run_row["run_name"]]
+        for field in reader.fieldnames or []:
+            if field not in fields:
+                fields.append(field)
+with summary_path.open("w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=fields)
+    writer.writeheader()
+    writer.writerows(prior)
+    writer.writerow(run_row)
+PY
 echo "Saved results/${job}.log, .json, .csv and updated benchmark_summary.csv"
