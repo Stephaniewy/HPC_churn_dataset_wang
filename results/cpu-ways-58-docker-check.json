@@ -1,0 +1,25 @@
+{
+  "run_name": "cpu-ways-58-docker-check",
+  "dataset_rows": 5000,
+  "features": 16,
+  "epochs": 1,
+  "batch_size": 256,
+  "steps": 13,
+  "compile_seconds": 0.3081659381277859,
+  "training_seconds": 0.3453770000487566,
+  "mean_step_ms": 26.530966646252914,
+  "p95_step_ms": 128.7473330739881,
+  "steps_per_second": 37.64002813784589,
+  "validation_accuracy": 0.26266666666666666,
+  "test_accuracy": 0.2786666666666667,
+  "test_roc_auc": 0.5891538731981718,
+  "telemetry": {
+    "visible_devices": [
+      "TFRT_CPU_0"
+    ],
+    "device_count": 1,
+    "platform": "Linux-5.14.0-503.14.1.el9_5.x86_64-x86_64-with-glibc2.41",
+    "jax_version": "0.6.2",
+    "nvidia_smi": "not available"
+  }
+}

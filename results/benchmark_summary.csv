@@ -1,0 +1,2 @@
+run_name,dataset_rows,features,epochs,batch_size,steps,compile_seconds,training_seconds,mean_step_ms,p95_step_ms,steps_per_second,validation_accuracy,test_accuracy,test_roc_auc,devices
+cpu-ways-58-docker-check,5000,16,1,256,13,0.3081659381277859,0.3453770000487566,26.530966646252914,128.7473330739881,37.64002813784589,0.26266666666666666,0.2786666666666667,0.5891538731981718,TFRT_CPU_0
