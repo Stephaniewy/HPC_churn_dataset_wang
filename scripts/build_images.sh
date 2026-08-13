@@ -20,10 +20,10 @@ case "$target" in
     ;;
   gpu)
     command -v docker >/dev/null || { echo "docker with buildx is required" >&2; exit 1; }
-    echo "Building the GH200 ARM64 image. Confirm this matches the Lab 1 registry workflow."
-    docker buildx build --platform linux/arm64 --push \
-      --build-arg 'JAX_PACKAGE=jax[cuda12]==0.6.2' \
+    echo "Building a no-RUN ARM64 overlay on the NVIDIA JAX image for GH200."
+    docker build --platform linux/arm64 -f Dockerfile.gpu \
       -t "${REPO}/churn-gpu-${TEAM}:latest" .
+    docker push "${REPO}/churn-gpu-${TEAM}:latest"
     ;;
   *) echo "target must be cpu, gpu, or tpu" >&2; exit 2 ;;
 esac

@@ -1,0 +1,14 @@
+# The course control host is AMD64 and has no QEMU. This Dockerfile deliberately
+# contains no RUN instruction: Buildah can add our code to the ARM64 NVIDIA JAX
+# image without executing ARM64 binaries on the control host.
+FROM nvcr.io/nvidia/jax:25.01-py3
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+WORKDIR /workspace
+
+COPY src/ src/
+COPY scripts/container_entrypoint.sh /usr/local/bin/container_entrypoint.sh
+
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/container_entrypoint.sh"]
+CMD ["python", "-u", "src/train.py"]
