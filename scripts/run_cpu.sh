@@ -35,7 +35,8 @@ case "$mode" in
   *) echo "mode must be verify or benchmark" >&2; exit 2 ;;
 esac
 
-docker build --build-arg 'JAX_PACKAGE=jax==0.6.2' -t "$image" .
+docker build --platform linux/amd64 \
+  --build-arg 'JAX_PACKAGE=jax==0.6.2' -t "$image" .
 docker run --rm \
   "${cpu_args[@]}" --memory "$cpu_memory" \
   -v "$PWD/data:/input:${data_volume_mode}" \
