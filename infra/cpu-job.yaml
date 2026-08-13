@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: churn-cpu-${TEAM}-${RUN_ID}
+  labels:
+    kueue.x-k8s.io/queue-name: student-queue
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: benchmark
+        image: ${CPU_IMAGE}
+        imagePullPolicy: Always
+        args: ["--run-name", "cpu-${RUN_ID}", "--output-dir", "/results"]
+        resources:
+          requests: {cpu: "4", memory: "8Gi"}
+          limits: {cpu: "4", memory: "8Gi"}
+        volumeMounts:
+        - {name: churn-data, mountPath: /input, readOnly: true}
+      volumes:
+      - name: churn-data
+        configMap: {name: churn-data-${TEAM}}

@@ -1,0 +1,6 @@
+# Generate this from the CSV with scripts/create_configmap.sh; do not hand-edit.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: churn-data
+data: {}

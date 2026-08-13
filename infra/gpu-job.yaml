@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: churn-gpu-${TEAM}-${RUN_ID}
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: benchmark
+        image: ${GPU_IMAGE}
+        imagePullPolicy: Always
+        args: ["--run-name", "gpu-${RUN_ID}", "--output-dir", "/results"]
+        resources:
+          requests: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
+          limits: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
+        volumeMounts:
+        - {name: churn-data, mountPath: /input, readOnly: true}
+      volumes:
+      - name: churn-data
+        configMap: {name: churn-data-${TEAM}}

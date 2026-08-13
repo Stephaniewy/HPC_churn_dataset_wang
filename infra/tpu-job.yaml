@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: churn-tpu-${TEAM}-${RUN_ID}
+  labels:
+    kueue.x-k8s.io/queue-name: student-queue
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        cloud.google.com/gke-tpu-accelerator: tpu-v5-lite-podslice
+        cloud.google.com/gke-tpu-topology: 2x4
+      containers:
+      - name: benchmark
+        image: ${TPU_IMAGE}
+        imagePullPolicy: Always
+        args: ["--run-name", "tpu-${RUN_ID}", "--output-dir", "/results"]
+        resources:
+          requests: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
+          limits: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
+        volumeMounts:
+        - {name: churn-data, mountPath: /input, readOnly: true}
+      volumes:
+      - name: churn-data
+        configMap: {name: churn-data-${TEAM}}

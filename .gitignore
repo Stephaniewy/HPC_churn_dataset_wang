@@ -1,0 +1,17 @@
+.DS_Store
+me344-churn-dnn-starter.zip
+*.swp
+*~
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+.kube/
+*kubeconfig*
+*.pem
+*.key
+service-account*.json
+application_default_credentials.json
+.venv/
+*.ipynb_checkpoints
