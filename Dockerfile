@@ -6,6 +6,7 @@ FROM python:3.11-slim
 
 ARG JAX_PACKAGE="jax==0.6.2"
 ARG JAX_FIND_LINKS=""
+ARG EXTRA_PACKAGES=""
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
@@ -13,7 +14,8 @@ WORKDIR /workspace
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt && \
-    if [ -n "$JAX_FIND_LINKS" ]; then pip install "$JAX_PACKAGE" -f "$JAX_FIND_LINKS"; else pip install "$JAX_PACKAGE"; fi
+    if [ -n "$JAX_FIND_LINKS" ]; then pip install "$JAX_PACKAGE" -f "$JAX_FIND_LINKS"; else pip install "$JAX_PACKAGE"; fi && \
+    if [ -n "$EXTRA_PACKAGES" ]; then pip install $EXTRA_PACKAGES; fi
 
 COPY src/ src/
 COPY scripts/container_entrypoint.sh /usr/local/bin/container_entrypoint.sh

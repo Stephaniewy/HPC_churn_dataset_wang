@@ -18,6 +18,7 @@ case "$target" in
     docker build --platform linux/amd64 \
       --build-arg 'JAX_PACKAGE=jax[tpu]==0.6.2' \
       --build-arg 'JAX_FIND_LINKS=https://storage.googleapis.com/jax-releases/libtpu_releases.html' \
+      --build-arg 'EXTRA_PACKAGES=tpu-info==0.14.2' \
       -t "${REPO}/churn-tpu-${TEAM}:latest" .
     docker push "${REPO}/churn-tpu-${TEAM}:latest"
     ;;
