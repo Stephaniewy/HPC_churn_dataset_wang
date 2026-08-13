@@ -61,7 +61,7 @@ Use the same `RUN_ID` only if you want records to share a timestamp. Each Kubern
 
 ### 1. CPU baseline on the assigned class server
 
-After logging into your assigned class Linux server, first prove the image and training entry point work with a one-epoch check. Then run the required 200-epoch baseline. Both commands build and run the immutable CPU container; no packages are installed on the running node.
+After logging into your assigned class Linux server, first prove the image and training entry point work with a one-epoch check. Then run the required 200-epoch baseline. Both commands build and run the immutable CPU container; no packages are installed on the running node. The course server provides Docker-compatible rootless Podman without CPU/cpuset cgroup controllers, so this baseline uses the assigned node and records its visible logical CPUs, actual process CPU use, and peak memory in the result telemetry rather than claiming an unenforced core limit.
 
 ```bash
 scripts/run_cpu.sh verify
@@ -104,11 +104,13 @@ Every run emits JSON and appends a row to `benchmark_summary.csv`. Record these 
 
 | Hardware | Compile seconds | Mean step ms | P95 step ms | Steps/s | Test accuracy | Test ROC-AUC | Utilization evidence |
 |---|---:|---:|---:|---:|---:|---:|---|
-| CPU | pending | pending | pending | pending | pending | pending | pod logs/device list |
+| Assigned CPU node | 0.3202 | 2.2956 | 2.2103 | 431.27 | 0.8667 | 0.7103 | 32 logical CPUs visible; 3.98% of node CPU capacity averaged; 431.54 MiB peak RSS |
 | GH200 | pending | pending | pending | pending | pending | pending | `nvidia-smi` captured in JSON |
 | TPU v5e (8 chips) | pending | pending | pending | pending | pending | pending | `tpu-info --streaming --rate 2` screenshot/log |
 
 The deterministic split means predictive metrics should be close across devices. If they are not, record the mismatch instead of silently comparing different runs.
+
+The CPU figure above is the measured 200-epoch run `cpu-ways-58-20260813-062851`. Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.27 logical cores on average (3.98% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run.
 
 ## Bottleneck hypothesis and mitigation
 

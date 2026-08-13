@@ -14,28 +14,17 @@ mkdir -p results
 
 cpu_count="${CPU_COUNT:-4}"
 cpu_memory="${CPU_MEMORY:-8g}"
-run_prefix=()
 cpu_args=()
 data_volume_mode="ro"
 results_volume_mode=""
 
-# The assigned Rocky Linux server exposes Docker-compatible Podman without the
-# rootless CPU cgroup controller. Pin the runtime process instead; the container
-# inherits that CPU affinity. Native Docker can use its normal --cpus limit.
+# The assigned Rocky Linux server exposes rootless Podman without CPU/cpuset
+# cgroup controllers. Run on the assigned node and record the visible CPUs and
+# actual utilization in telemetry. Native Docker can enforce an explicit limit.
 if grep -qi podman <<<"$docker_details"; then
-  command -v taskset >/dev/null || {
-    echo "Podman without taskset cannot enforce a reproducible CPU allocation." >&2
-    exit 1
-  }
-  cpu_set="${CPUSET:-0-$((cpu_count - 1))}"
-  if ! taskset -c "$cpu_set" true 2>/dev/null; then
-    echo "CPUSET '$cpu_set' is unavailable; allowed CPUs: $(taskset -pc $$ 2>/dev/null || echo unknown)" >&2
-    exit 1
-  fi
-  run_prefix=(taskset -c "$cpu_set")
   data_volume_mode="ro,Z"
   results_volume_mode=":Z"
-  echo "Podman detected: pinning the container to CPUSET=${cpu_set}."
+  echo "Rootless Podman detected: using the assigned CPU node; telemetry records visible CPUs and utilization."
 else
   cpu_args=(--cpus "$cpu_count")
 fi
@@ -47,7 +36,7 @@ case "$mode" in
 esac
 
 docker build --build-arg 'JAX_PACKAGE=jax==0.6.2' -t "$image" .
-"${run_prefix[@]}" docker run --rm \
+docker run --rm \
   "${cpu_args[@]}" --memory "$cpu_memory" \
   -v "$PWD/data:/input:${data_volume_mode}" \
   -v "$PWD/results:/workspace/results${results_volume_mode}" \

@@ -5,11 +5,14 @@
   "epochs": 1,
   "batch_size": 256,
   "steps": 13,
-  "compile_seconds": 0.3081659381277859,
-  "training_seconds": 0.3453770000487566,
-  "mean_step_ms": 26.530966646252914,
-  "p95_step_ms": 128.7473330739881,
-  "steps_per_second": 37.64002813784589,
+  "compile_seconds": 0.30454678810201585,
+  "data_loading_seconds": 0.03125202679075301,
+  "device_transfer_seconds": 0.001647443976253271,
+  "training_seconds": 0.34193712403066456,
+  "mean_step_ms": 26.278427425915233,
+  "p95_step_ms": 127.71230582147791,
+  "steps_per_second": 38.018685560548185,
+  "measured_end_to_end_seconds": 1.7402367531321943,
   "validation_accuracy": 0.26266666666666666,
   "test_accuracy": 0.2786666666666667,
   "test_roc_auc": 0.5891538731981718,
@@ -20,6 +23,12 @@
     "device_count": 1,
     "platform": "Linux-5.14.0-503.14.1.el9_5.x86_64-x86_64-with-glibc2.41",
     "jax_version": "0.6.2",
-    "nvidia_smi": "not available"
+    "cpu_affinity_count": 32,
+    "process_cpu_seconds": 3.6670203179999987,
+    "process_cpu_utilization_percent": 6.584988205268354,
+    "peak_host_rss_mib": 428.53125,
+    "gpu_sample_interval_seconds": 0.5,
+    "gpu_samples": [],
+    "gpu_sampling": "nvidia-smi not available"
   }
 }
