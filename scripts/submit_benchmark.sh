@@ -15,7 +15,7 @@ case "$target" in
   gpu) manifest=infra/gpu-job.yaml ;;
   tpu)
     manifest=infra/tpu-job.yaml
-    : "${TPU_IMAGE:=${REPO}/churn-tpu-${TEAM}@sha256:e9a7e8ff4f7448b6ab9a8813a1f07223a28ea4b94cb2fa28541c948fdb728a74}"
+    TPU_IMAGE="${TPU_IMAGE_OVERRIDE:-${REPO}/churn-tpu-${TEAM}@sha256:e9a7e8ff4f7448b6ab9a8813a1f07223a28ea4b94cb2fa28541c948fdb728a74}"
     export TPU_IMAGE
     ;;
   *) echo "target must be cpu, gpu, or tpu" >&2; exit 2 ;;
