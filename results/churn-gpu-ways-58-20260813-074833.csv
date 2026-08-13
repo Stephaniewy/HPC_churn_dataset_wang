@@ -1,0 +1,2 @@
+run_name,dataset_rows,features,epochs,batch_size,steps,compile_seconds,data_loading_seconds,device_transfer_seconds,training_seconds,mean_step_ms,p95_step_ms,steps_per_second,measured_end_to_end_seconds,validation_accuracy,test_accuracy,test_roc_auc,devices
+gpu-ways-58-20260813-074833,5000,16,200,256,2600,0.5377338537946343,0.03545117238536477,0.00816787127405405,15.491058373823762,5.919949932991026,12.493282603099932,167.83875815698863,18.868408624082804,0.8653333333333333,0.864,0.6227879995312317,cuda:0

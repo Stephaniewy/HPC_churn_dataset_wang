@@ -1,0 +1,253 @@
+-----BEGIN BENCHMARK JSON-----
+{
+  "run_name": "gpu-ways-58-20260813-074833",
+  "dataset_rows": 5000,
+  "features": 16,
+  "epochs": 200,
+  "batch_size": 256,
+  "steps": 2600,
+  "compile_seconds": 0.5377338537946343,
+  "data_loading_seconds": 0.03545117238536477,
+  "device_transfer_seconds": 0.00816787127405405,
+  "training_seconds": 15.491058373823762,
+  "mean_step_ms": 5.919949932991026,
+  "p95_step_ms": 12.493282603099932,
+  "steps_per_second": 167.83875815698863,
+  "measured_end_to_end_seconds": 18.868408624082804,
+  "validation_accuracy": 0.8653333333333333,
+  "test_accuracy": 0.864,
+  "test_roc_auc": 0.6227879995312317,
+  "telemetry": {
+    "visible_devices": [
+      "cuda:0"
+    ],
+    "device_count": 1,
+    "platform": "Linux-6.14.0-29-generic-aarch64-with-glibc2.39",
+    "jax_version": "0.4.38.dev20250115+838500378",
+    "cpu_affinity_count": 72,
+    "process_cpu_seconds": 32.89788496,
+    "process_cpu_utilization_percent": 2.421587734249632,
+    "peak_host_rss_mib": 800.73046875,
+    "gpu_sample_interval_seconds": 0.5,
+    "gpu_samples": [
+      {
+        "timestamp_seconds": 1786607327.2352688,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 0.0,
+        "memory_used_mib": 582.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607327.7744393,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 0.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607328.326513,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 0.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607328.8725607,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 2.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607329.4346967,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607329.9738383,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607330.5059164,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 2.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607331.042387,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607331.5825787,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607332.1151893,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607332.6521006,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607333.1783738,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607333.7090726,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607334.2550209,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607334.8053896,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 2.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607335.3666062,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607335.9095922,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607336.4558783,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607336.99708,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607337.5289707,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607338.067671,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607338.6098828,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607339.1564465,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607339.6943564,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607340.248759,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607340.7871747,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607341.317085,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607341.8755713,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607342.4140596,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      },
+      {
+        "timestamp_seconds": 1786607342.9745848,
+        "name": "NVIDIA GH200 480GB",
+        "utilization_percent": 1.0,
+        "memory_used_mib": 650.0,
+        "memory_total_mib": 97871.0
+      }
+    ],
+    "gpu_mean_utilization_percent": 1.0,
+    "gpu_peak_utilization_percent": 2.0,
+    "gpu_peak_memory_used_mib": 650.0
+  }
+}
+-----END BENCHMARK JSON-----
+-----BEGIN BENCHMARK CSV-----
+run_name,dataset_rows,features,epochs,batch_size,steps,compile_seconds,data_loading_seconds,device_transfer_seconds,training_seconds,mean_step_ms,p95_step_ms,steps_per_second,measured_end_to_end_seconds,validation_accuracy,test_accuracy,test_roc_auc,devices
+gpu-ways-58-20260813-074833,5000,16,200,256,2600,0.5377338537946343,0.03545117238536477,0.00816787127405405,15.491058373823762,5.919949932991026,12.493282603099932,167.83875815698863,18.868408624082804,0.8653333333333333,0.864,0.6227879995312317,cuda:0
+-----END BENCHMARK CSV-----

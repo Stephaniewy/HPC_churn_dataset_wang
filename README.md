@@ -28,7 +28,7 @@ flowchart TD
 | `infra/` | ConfigMap and reusable Kubernetes Jobs |
 | `scripts/` | Build, submission, and collection helpers |
 | `data/Churn_Dataset.csv` | Original course dataset; mounted at runtime rather than copied into the image |
-| `results/` | Commit the final JSON/CSV/logs/plots after each benchmark |
+| `results/` | Raw JSON/CSV/log evidence, the final three-row summary, and generated charts |
 
 ## Before running
 
@@ -98,25 +98,41 @@ kubectl delete job churn-tpu-${TEAM}-<RUN_ID>
 
 The TPU Job requests `google.com/tpu: 8`, selector `tpu-v5-lite-podslice`, topology `2x4`, and the required `student-queue` label. `ADMITTED: True` with a Pending pod is normal while Autopilot starts the TPU node.
 
-## Measurements to report
+## Final measured results
 
-Every run emits JSON and appends a row to `benchmark_summary.csv`. Record these values in the final table:
+Every run emits JSON and CSV records. `scripts/summarize_results.py` rebuilds the final comparison and charts directly from the three selected 200-epoch JSON artifacts:
 
-| Hardware | Compile seconds | Mean step ms | P95 step ms | Steps/s | Test accuracy | Test ROC-AUC | Utilization evidence |
-|---|---:|---:|---:|---:|---:|---:|---|
-| Assigned CPU node | 0.2318 | 1.8966 | 1.8278 | 523.23 | 0.8600 | 0.6930 | 32 logical CPUs visible; 3.73% of node CPU capacity averaged; 308.51 MiB peak RSS |
-| GH200 | pending | pending | pending | pending | pending | pending | `nvidia-smi` captured in JSON |
-| TPU v5e (8 chips) | pending | pending | pending | pending | pending | pending | `tpu-info --streaming --rate 2` screenshot/log |
+```bash
+python3 scripts/summarize_results.py
+```
 
-The deterministic split means predictive metrics should be close across devices. If they are not, record the mismatch instead of silently comparing different runs.
+| Hardware | Compile (s) | Training (s) | End-to-end (s) | Mean step (ms) | P95 step (ms) | Steps/s | Accuracy | ROC-AUC |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Assigned CPU node | 0.2318 | 4.9691 | 6.3631 | 1.8966 | 1.8278 | 523.23 | 0.8600 | 0.6930 |
+| NVIDIA GH200 | 0.5377 | 15.4911 | 18.8684 | 5.9199 | 12.4933 | 167.84 | 0.8640 | 0.6228 |
+| TPU v5e 2x4 (8 chips) | 0.1769 | 6.5718 | 12.7164 | 2.5173 | 2.5401 | 395.63 | 0.8587 | 0.6934 |
 
-The CPU figure above is the final portable NumPy-pipeline 200-epoch run `cpu-ways-58-20260813-070716`. Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.20 logical cores on average (3.73% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run. The earlier `062851` run used the superseded sklearn preprocessing pipeline and is excluded from the comparison table.
+![Training time comparison](results/charts/training_time.svg)
+
+![Throughput comparison](results/charts/throughput.svg)
+
+![Predictive quality comparison](results/charts/predictive_quality.svg)
+
+The deterministic split makes the CPU and TPU predictive metrics nearly identical. The GH200 run reached similar accuracy but lower ROC-AUC; that observed mismatch is retained rather than replaced or normalized away. JAX versions also differed: CPU and TPU used 0.6.2, while the course NVIDIA runtime supplied `0.4.38.dev20250115+838500378`.
+
+The selected artifacts are `cpu-ways-58-20260813-070716`, `churn-gpu-ways-58-20260813-074833`, and `churn-tpu-ways-58-verify-20260813-075510`. The TPU filename says `verify`, but the older server-side manifest omitted the epoch override, so the immutable image executed its default 200 epochs and 2,600 steps. The complete run is retained as the formal TPU measurement; the corrected repository manifest now forwards `EPOCHS`.
+
+Rootless Podman exposed all 32 logical CPUs because the course host does not provide CPU/cpuset cgroup controllers. Process CPU time divided by wall time corresponds to about 1.20 logical cores on average (3.73% of the 32-core-visible capacity). The row is therefore labeled as the assigned CPU node, not as a four-core run. The earlier `062851` run used the superseded sklearn preprocessing pipeline and is excluded.
+
+The formal GPU Job used the public immutable GHCR image `ghcr.io/stephaniewy/hpc_churn_dataset_wang-gpu@sha256:c4ff36e4f45a8fe2f7455f35c5fccbf0f80510505ad9ca1b2217c18cfeb22882`. With JAX preallocation disabled, sampled GPU utilization averaged 1%, peaked at 2%, and peak allocated GPU memory was approximately 650 MiB. The formal TPU Pod used `us-central1-docker.pkg.dev/soe-hpccenter/tpu-images/churn-tpu-ways-58@sha256:cab5d618d437a99c58ed8411ba09366e37a43d3225c2b659cf76d643eb04cdf4` and exposed all eight expected devices. The TPU container did not provide an accelerator-utilization sampler, so this project reports device topology and host telemetry but does not claim a TPU utilization percentage.
 
 ## Bottleneck hypothesis and mitigation
 
-At this dataset size, the likely bottleneck is fixed overhead: image start-up, data transfer, and XLA compilation outweigh dense-matrix arithmetic. A GH200/TPU can therefore show lower steady-state step time without lower end-to-end wall time. The evidence must decide this conclusion.
+The measured bottleneck is workload size rather than accelerator capacity. The 5,000-row, 16-feature MLP does too little matrix work per step to amortize accelerator dispatch and synchronization. CPU training was 3.12x faster than GH200 training and 1.32x faster than the eight-chip TPU; CPU end-to-end time was also lowest. The GH200's 1% mean sampled utilization and 650 MiB peak memory reinforce the underutilization diagnosis.
 
-Mitigations to test after the baseline are: (1) cache the mounted CSV in `/dev/shm`, already implemented; (2) increase batch size within device memory; (3) run more epochs or a larger dataset to amortize compilation; and (4) on TPU test bfloat16 in a separately labeled experiment. Do not mix an optimized experiment with the fair float32 baseline table.
+For this telecom churn workload, the assigned CPU is the practical deployment and periodic-retraining choice: it is fastest here and avoids reserving scarce accelerators. GPU or TPU becomes defensible only after materially increasing model width, dataset size, batch size, retraining frequency, or concurrent workload volume. Predictive feasibility also needs business validation: accuracy alone can hide minority-class errors, while ROC-AUC near 0.69 indicates only moderate ranking quality. A production retention workflow should select a decision threshold using false-positive offer cost, false-negative churn loss, calibration, and drift monitoring.
+
+Possible separately labeled scaling experiments include larger batches, repeated or larger datasets, wider networks, and TPU bfloat16. They are not mixed into this fair float32 baseline.
 
 ## Reproducibility and cleanup
 
