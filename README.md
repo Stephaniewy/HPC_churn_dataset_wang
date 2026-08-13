@@ -6,6 +6,11 @@ This repository packages a JAX/XLA multi-layer perceptron (16 input features →
 
 The submitted benchmark is deliberately small (5,000 data rows plus a CSV header), so accelerator compilation and host-to-device transfer can be an important fraction of total latency. The project separately records cold-start/XLA compilation time and steady-state training step time.
 
+## Presentation
+
+- [Five-slide PowerPoint](presentation/ME344_Churn_DNN_Capstone.pptx)
+- [Recorded video presentation](https://drive.google.com/file/d/1mvc9__6PMV8Ce1yh0I8sBAUzduEa-aJw/view?usp=share_link) (Google Drive)
+
 ## System topology diagram
 
 ```mermaid
