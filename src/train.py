@@ -120,7 +120,10 @@ def parse_tpu_info(raw):
     duty, tensorcore, hbm_used, hbm_total = [], [], [], []
     section = None
     for line in raw.splitlines():
-        stripped = line.strip()
+        # Rich emits Unicode borders and can emit ANSI styling. Normalize both
+        # forms before parsing table cells.
+        stripped = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", line).strip()
+        stripped = stripped.replace("│", "|")
         if stripped == "TPU Duty Cycle":
             section = "duty"
             continue
@@ -157,24 +160,33 @@ def parse_tpu_info(raw):
     return sample
 
 
-def sample_tpu(stop_event, samples):
+def sample_tpu(stop_event, samples, diagnostics):
     """Poll libtpu runtime metrics while the JAX workload is active."""
-    command = ["tpu-info", "--metric", "duty_cycle_percent", "hbm_usage",
-               "tensorcore_utilization"]
+    # Duty cycle and HBM are required here. Some older libtpu runtimes reject
+    # the whole request when the optional TensorCore metric is also included.
+    command = ["tpu-info", "--metric", "duty_cycle_percent", "hbm_usage"]
     while not stop_event.is_set():
         try:
             raw = subprocess.check_output(
                 command, text=True, stderr=subprocess.STDOUT, timeout=5)
+            diagnostics["command"] = command
+            diagnostics["last_output"] = raw[-12000:]
             sample = parse_tpu_info(raw)
             if len(sample) > 1:
                 samples.append(sample)
-        except (FileNotFoundError, subprocess.CalledProcessError,
-                subprocess.TimeoutExpired, ValueError):
+        except subprocess.CalledProcessError as error:
+            diagnostics["command"] = command
+            diagnostics["error"] = f"exit status {error.returncode}"
+            diagnostics["last_output"] = (error.output or "")[-12000:]
+            return
+        except (FileNotFoundError, subprocess.TimeoutExpired, ValueError) as error:
+            diagnostics["command"] = command
+            diagnostics["error"] = repr(error)
             return
         stop_event.wait(1.0)
 
 
-def telemetry(gpu_samples, tpu_samples, cpu_seconds, measured_wall_seconds):
+def telemetry(gpu_samples, tpu_samples, tpu_diagnostics, cpu_seconds, measured_wall_seconds):
     affinity_count = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else (os.cpu_count() or 1)
     usage = resource.getrusage(resource.RUSAGE_SELF)
     out = {"visible_devices": [str(d) for d in jax.devices()], "device_count": jax.device_count(),
@@ -183,7 +195,8 @@ def telemetry(gpu_samples, tpu_samples, cpu_seconds, measured_wall_seconds):
            "process_cpu_utilization_percent": 100.0 * cpu_seconds / measured_wall_seconds / affinity_count,
            "peak_host_rss_mib": usage.ru_maxrss / 1024.0,
            "gpu_sample_interval_seconds": 0.5, "gpu_samples": gpu_samples,
-           "tpu_sample_interval_seconds": 1.0, "tpu_samples": tpu_samples}
+           "tpu_sample_interval_seconds": 1.0, "tpu_samples": tpu_samples,
+           "tpu_info_diagnostics": tpu_diagnostics}
     if gpu_samples:
         out["gpu_mean_utilization_percent"] = float(np.mean([s["utilization_percent"] for s in gpu_samples]))
         out["gpu_peak_utilization_percent"] = float(max(s["utilization_percent"] for s in gpu_samples))
@@ -246,12 +259,15 @@ def main():
 
     gpu_samples = []
     tpu_samples = []
+    tpu_diagnostics = {}
     stop_sampling = threading.Event()
     sampler = threading.Thread(target=sample_nvidia, args=(stop_sampling, gpu_samples), daemon=True)
     sampler.start()
     tpu_sampler = None
     if getattr(device, "platform", "") == "tpu":
-        tpu_sampler = threading.Thread(target=sample_tpu, args=(stop_sampling, tpu_samples), daemon=True)
+        tpu_sampler = threading.Thread(
+            target=sample_tpu,
+            args=(stop_sampling, tpu_samples, tpu_diagnostics), daemon=True)
         tpu_sampler.start()
 
     # First call includes XLA compilation; later calls measure steady-state training only.
@@ -298,7 +314,8 @@ def main():
                "measured_end_to_end_seconds": measured_wall_seconds,
                "validation_accuracy": float(val_acc), "test_accuracy": float(test_acc),
                "test_roc_auc": binary_roc_auc(test_y, test_prob),
-               "telemetry": telemetry(gpu_samples, tpu_samples, cpu_seconds, measured_wall_seconds)}
+               "telemetry": telemetry(gpu_samples, tpu_samples, tpu_diagnostics,
+                                      cpu_seconds, measured_wall_seconds)}
     out = Path(a.output_dir); out.mkdir(parents=True, exist_ok=True)
     (out / f"{a.run_name}.json").write_text(json.dumps(payload, indent=2))
     flat = {k: v for k, v in payload.items() if k != "telemetry"}; flat["devices"] = "; ".join(payload["telemetry"]["visible_devices"])
