@@ -13,7 +13,11 @@ target="${1:?usage: scripts/submit_benchmark.sh <cpu|gpu|tpu>}"
 case "$target" in
   cpu) manifest=infra/cpu-job.yaml; export CPU_IMAGE="${REPO}/churn-cpu-${TEAM}:latest" ;;
   gpu) manifest=infra/gpu-job.yaml ;;
-  tpu) manifest=infra/tpu-job.yaml; export TPU_IMAGE="${REPO}/churn-tpu-${TEAM}:latest" ;;
+  tpu)
+    manifest=infra/tpu-job.yaml
+    : "${TPU_IMAGE:=${REPO}/churn-tpu-${TEAM}@sha256:cab5d618d437a99c58ed8411ba09366e37a43d3225c2b659cf76d643eb04cdf4}"
+    export TPU_IMAGE
+    ;;
   *) echo "target must be cpu, gpu, or tpu" >&2; exit 2 ;;
 esac
 
