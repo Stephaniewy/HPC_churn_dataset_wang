@@ -11,31 +11,18 @@ spec:
         kubernetes.io/arch: arm64
       containers:
       - name: benchmark
-        # Lab 1's public, GH200 ARM64-verified runtime avoids private-registry
-        # imagePullSecrets, which the student RBAC persona cannot create.
-        image: nvcr.io/nvidia/jax:25.01-py3
+        # Public GHCR image built from Dockerfile.gpu and pinned by digest.
+        image: ghcr.io/stephaniewy/hpc_churn_dataset_wang-gpu@sha256:c4ff36e4f45a8fe2f7455f35c5fccbf0f80510505ad9ca1b2217c18cfeb22882
         imagePullPolicy: IfNotPresent
         env:
         - name: XLA_PYTHON_CLIENT_PREALLOCATE
           value: "false"
-        command: ["/bin/sh", "-c"]
-        args:
-        - |
-          mkdir -p /dev/shm/churn
-          cp /input/Churn_Dataset.csv /dev/shm/churn/Churn_Dataset.csv
-          exec python -u /code/train.py \
-            --data /dev/shm/churn/Churn_Dataset.csv \
-            --run-name gpu-${TEAM}-${RUN_ID} \
-            --output-dir /results \
-            --epochs ${EPOCHS}
+        args: ["--run-name", "gpu-${TEAM}-${RUN_ID}", "--output-dir", "/results", "--epochs", "${EPOCHS}"]
         resources:
           requests: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
           limits: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
         volumeMounts:
         - {name: churn-data, mountPath: /input, readOnly: true}
-        - {name: churn-code, mountPath: /code, readOnly: true}
       volumes:
       - name: churn-data
         configMap: {name: churn-data-${TEAM}}
-      - name: churn-code
-        configMap: {name: churn-code-${TEAM}}
