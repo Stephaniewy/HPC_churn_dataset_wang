@@ -14,10 +14,6 @@ from pathlib import Path
 import jax
 import jax.numpy as jnp
 import numpy as np
-import pandas as pd
-from sklearn.metrics import accuracy_score, roc_auc_score
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 
 def parse_args():
@@ -33,13 +29,46 @@ def parse_args():
 
 
 def load_data(path, seed):
-    df = pd.read_csv(path)
-    y = df.pop("churned").astype(str).str.upper().eq("TRUE").astype(np.float32).to_numpy()
-    X = df.apply(pd.to_numeric, errors="coerce").fillna(df.median(numeric_only=True)).to_numpy(np.float32)
-    X_train, X_holdout, y_train, y_holdout = train_test_split(X, y, test_size=0.30, random_state=seed, stratify=y)
-    X_val, X_test, y_val, y_test = train_test_split(X_holdout, y_holdout, test_size=0.50, random_state=seed, stratify=y_holdout)
-    scaler = StandardScaler().fit(X_train)
-    return *(scaler.transform(a).astype(np.float32) for a in (X_train, X_val, X_test)), y_train, y_val, y_test, len(df), X.shape[1]
+    with open(path, newline="") as f:
+        reader = csv.DictReader(f)
+        feature_names = [name for name in reader.fieldnames if name != "churned"]
+        rows, labels = [], []
+        for row in reader:
+            rows.append([float(row[name]) if row[name].strip() else np.nan for name in feature_names])
+            labels.append(float(row["churned"].strip().upper() == "TRUE"))
+    X, y = np.asarray(rows, np.float32), np.asarray(labels, np.float32)
+    medians = np.nanmedian(X, axis=0)
+    X = np.where(np.isnan(X), medians, X).astype(np.float32)
+
+    rng = np.random.default_rng(seed)
+    splits = {"train": [], "val": [], "test": []}
+    for label in np.unique(y):
+        indices = np.flatnonzero(y == label)
+        rng.shuffle(indices)
+        n_test = round(len(indices) * 0.15)
+        n_val = round(len(indices) * 0.15)
+        splits["test"].extend(indices[:n_test])
+        splits["val"].extend(indices[n_test:n_test + n_val])
+        splits["train"].extend(indices[n_test + n_val:])
+    for indices in splits.values():
+        rng.shuffle(indices)
+    train_idx = np.asarray(splits["train"])
+    val_idx = np.asarray(splits["val"])
+    test_idx = np.asarray(splits["test"])
+    mean, std = X[train_idx].mean(axis=0), X[train_idx].std(axis=0)
+    std = np.where(std == 0, 1.0, std)
+    scaled = ((X - mean) / std).astype(np.float32)
+    return (scaled[train_idx], scaled[val_idx], scaled[test_idx],
+            y[train_idx], y[val_idx], y[test_idx], len(y), X.shape[1])
+
+
+def binary_roc_auc(y_true, scores):
+    positive = scores[y_true == 1]
+    negative = scores[y_true == 0]
+    if not len(positive) or not len(negative):
+        raise ValueError("ROC-AUC requires both classes")
+    comparisons = positive[:, None] - negative[None, :]
+    return float(np.mean((comparisons > 0) + 0.5 * (comparisons == 0)))
 
 
 def init_params(key, input_dim):
@@ -57,7 +86,8 @@ def forward(params, x):
 
 
 def loss_fn(params, x, y):
-    return jnp.mean(jnp.maximum(forward(params, x), 0) - forward(params, x) * y + jnp.log1p(jnp.exp(-jnp.abs(forward(params, x)))))
+    logits = forward(params, x)
+    return jnp.mean(jnp.maximum(logits, 0) - logits * y + jnp.log1p(jnp.exp(-jnp.abs(logits))))
 
 
 @jax.jit
@@ -163,8 +193,9 @@ def main():
 
     val_prob = np.asarray(jax.nn.sigmoid(forward(params, X_val)))
     test_prob = np.asarray(jax.nn.sigmoid(forward(params, X_test)))
-    val_acc = accuracy_score(np.asarray(y_val), val_prob >= 0.5)
-    test_acc = accuracy_score(np.asarray(y_test), test_prob >= 0.5)
+    val_y, test_y = np.asarray(y_val), np.asarray(y_test)
+    val_acc = np.mean(val_y == (val_prob >= 0.5))
+    test_acc = np.mean(test_y == (test_prob >= 0.5))
     measured_wall_seconds = time.perf_counter() - wall_start
     cpu_seconds = time.process_time() - cpu_start
     payload = {"run_name": a.run_name, "dataset_rows": n_rows, "features": n_features, "epochs": a.epochs,
@@ -174,7 +205,7 @@ def main():
                "p95_step_ms": float(np.percentile(step_times, 95) * 1000), "steps_per_second": len(step_times) / training_seconds,
                "measured_end_to_end_seconds": measured_wall_seconds,
                "validation_accuracy": float(val_acc), "test_accuracy": float(test_acc),
-               "test_roc_auc": float(roc_auc_score(np.asarray(y_test), test_prob)),
+               "test_roc_auc": binary_roc_auc(test_y, test_prob),
                "telemetry": telemetry(gpu_samples, cpu_seconds, measured_wall_seconds)}
     out = Path(a.output_dir); out.mkdir(parents=True, exist_ok=True)
     (out / f"{a.run_name}.json").write_text(json.dumps(payload, indent=2))

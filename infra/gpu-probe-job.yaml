@@ -17,12 +17,10 @@ spec:
         args:
         - |
           import platform
-          import jax, numpy, pandas, sklearn
+          import jax, numpy
           print("architecture=", platform.machine())
           print("jax_version=", jax.__version__)
           print("numpy_version=", numpy.__version__)
-          print("pandas_version=", pandas.__version__)
-          print("sklearn_version=", sklearn.__version__)
           print("jax_devices=", jax.devices())
         resources:
           requests: {nvidia.com/gpu: "1", cpu: "1", memory: "2Gi"}
