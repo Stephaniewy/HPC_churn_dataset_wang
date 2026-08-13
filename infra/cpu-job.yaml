@@ -13,7 +13,7 @@ spec:
       - name: benchmark
         image: ${CPU_IMAGE}
         imagePullPolicy: Always
-        args: ["--run-name", "cpu-${RUN_ID}", "--output-dir", "/results"]
+        args: ["--run-name", "cpu-${TEAM}-${RUN_ID}", "--output-dir", "/results", "--epochs", "${EPOCHS}"]
         resources:
           requests: {cpu: "4", memory: "8Gi"}
           limits: {cpu: "4", memory: "8Gi"}

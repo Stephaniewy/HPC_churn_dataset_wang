@@ -6,6 +6,7 @@ set -euo pipefail
 : "${TEAM:=ways-58}"
 : "${RUN_ID:=$(date -u +%Y%m%d-%H%M%S)}"
 : "${KUBE_NAMESPACE:=default}"
+: "${EPOCHS:=200}"
 REPO="${REGISTRY_REGION}-docker.pkg.dev/${PROJECT}/tpu-images"
 target="${1:?usage: scripts/submit_benchmark.sh <cpu|gpu|tpu>}"
 
@@ -26,7 +27,7 @@ case "$target:$cluster" in
   cpu:*) ;;
 esac
 
-export RUN_ID TEAM
+export RUN_ID TEAM EPOCHS
 envsubst < "$manifest" | kubectl -n "$KUBE_NAMESPACE" apply -f -
 job="churn-${target}-${TEAM}-${RUN_ID}"
 echo "Submitted ${KUBE_NAMESPACE}/${job}"

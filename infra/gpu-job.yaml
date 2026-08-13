@@ -7,11 +7,13 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/arch: arm64
       containers:
       - name: benchmark
         image: ${GPU_IMAGE}
         imagePullPolicy: Always
-        args: ["--run-name", "gpu-${RUN_ID}", "--output-dir", "/results"]
+        args: ["--run-name", "gpu-${TEAM}-${RUN_ID}", "--output-dir", "/results", "--epochs", "${EPOCHS}"]
         resources:
           requests: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}
           limits: {nvidia.com/gpu: "1", cpu: "4", memory: "16Gi"}

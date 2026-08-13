@@ -17,7 +17,7 @@ spec:
       - name: benchmark
         image: ${TPU_IMAGE}
         imagePullPolicy: Always
-        args: ["--run-name", "tpu-${RUN_ID}", "--output-dir", "/results"]
+        args: ["--run-name", "tpu-${TEAM}-${RUN_ID}", "--output-dir", "/results", "--epochs", "${EPOCHS}"]
         resources:
           requests: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
           limits: {google.com/tpu: "8", cpu: "8", memory: "32Gi"}
