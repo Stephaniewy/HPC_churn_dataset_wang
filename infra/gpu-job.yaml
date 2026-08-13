@@ -15,6 +15,9 @@ spec:
         # imagePullSecrets, which the student RBAC persona cannot create.
         image: nvcr.io/nvidia/jax:25.01-py3
         imagePullPolicy: IfNotPresent
+        env:
+        - name: XLA_PYTHON_CLIENT_PREALLOCATE
+          value: "false"
         command: ["/bin/sh", "-c"]
         args:
         - |
