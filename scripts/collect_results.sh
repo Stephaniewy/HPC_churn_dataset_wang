@@ -12,6 +12,15 @@ if ! kubectl -n "$KUBE_NAMESPACE" wait --for=condition=complete "job/$job" --tim
 fi
 pod=$(kubectl -n "$KUBE_NAMESPACE" get pods -l "job-name=$job" -o jsonpath='{.items[0].metadata.name}')
 kubectl -n "$KUBE_NAMESPACE" logs "$pod" > "results/${job}.log"
-mkdir -p "results/${job}"
-kubectl -n "$KUBE_NAMESPACE" cp "$pod:/results/." "results/${job}/"
-echo "Saved logs and metrics under results/${job}*"
+sed -n '/^-----BEGIN BENCHMARK JSON-----$/,/^-----END BENCHMARK JSON-----$/p' "results/${job}.log" \
+  | sed '1d;$d' > "results/${job}.json"
+sed -n '/^-----BEGIN BENCHMARK CSV-----$/,/^-----END BENCHMARK CSV-----$/p' "results/${job}.log" \
+  | sed '1d;$d' > "results/${job}.csv"
+
+python3 -m json.tool "results/${job}.json" >/dev/null
+if [ ! -s results/benchmark_summary.csv ]; then
+  cp "results/${job}.csv" results/benchmark_summary.csv
+else
+  tail -n +2 "results/${job}.csv" >> results/benchmark_summary.csv
+fi
+echo "Saved results/${job}.log, .json, .csv and updated benchmark_summary.csv"

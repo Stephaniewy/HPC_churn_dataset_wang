@@ -1,6 +1,7 @@
 """Reproducible JAX/XLA DNN churn benchmark for CPU, GH200 GPU, and TPU v5e."""
 import argparse
 import csv
+import io
 import json
 import os
 import platform
@@ -179,7 +180,15 @@ def main():
     (out / f"{a.run_name}.json").write_text(json.dumps(payload, indent=2))
     flat = {k: v for k, v in payload.items() if k != "telemetry"}; flat["devices"] = "; ".join(payload["telemetry"]["visible_devices"])
     append_summary(out / "benchmark_summary.csv", flat)
+    print("-----BEGIN BENCHMARK JSON-----")
     print(json.dumps(payload, indent=2))
+    print("-----END BENCHMARK JSON-----")
+    stream = io.StringIO()
+    writer = csv.DictWriter(stream, fieldnames=flat.keys())
+    writer.writeheader(); writer.writerow(flat)
+    print("-----BEGIN BENCHMARK CSV-----")
+    print(stream.getvalue().strip())
+    print("-----END BENCHMARK CSV-----")
 
 
 if __name__ == "__main__":
