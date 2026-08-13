@@ -16,7 +16,8 @@ cpu_count="${CPU_COUNT:-4}"
 cpu_memory="${CPU_MEMORY:-8g}"
 run_prefix=()
 cpu_args=()
-volume_label=""
+data_volume_mode="ro"
+results_volume_mode=""
 
 # The assigned Rocky Linux server exposes Docker-compatible Podman without the
 # rootless CPU cgroup controller. Pin the runtime process instead; the container
@@ -32,7 +33,8 @@ if grep -qi podman <<<"$docker_details"; then
     exit 1
   fi
   run_prefix=(taskset -c "$cpu_set")
-  volume_label=",Z"
+  data_volume_mode="ro,Z"
+  results_volume_mode=":Z"
   echo "Podman detected: pinning the container to CPUSET=${cpu_set}."
 else
   cpu_args=(--cpus "$cpu_count")
@@ -47,8 +49,8 @@ esac
 docker build --build-arg 'JAX_PACKAGE=jax==0.6.2' -t "$image" .
 "${run_prefix[@]}" docker run --rm \
   "${cpu_args[@]}" --memory "$cpu_memory" \
-  -v "$PWD/data:/input:ro${volume_label}" \
-  -v "$PWD/results:/workspace/results${volume_label}" \
+  -v "$PWD/data:/input:${data_volume_mode}" \
+  -v "$PWD/results:/workspace/results${results_volume_mode}" \
   "$image" --run-name "$run_name" --epochs "$epochs" \
   | tee "results/${run_name}.log"
 
