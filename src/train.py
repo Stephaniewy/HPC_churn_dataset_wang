@@ -164,7 +164,7 @@ def sample_tpu(stop_event, samples):
     while not stop_event.is_set():
         try:
             raw = subprocess.check_output(
-                command, text=True, stderr=subprocess.STDOUT, timeout=10)
+                command, text=True, stderr=subprocess.STDOUT, timeout=5)
             sample = parse_tpu_info(raw)
             if len(sample) > 1:
                 samples.append(sample)
@@ -271,10 +271,6 @@ def main():
             jax.block_until_ready(params)
             step_times.append(time.perf_counter() - t0)
     training_seconds = time.perf_counter() - train_start
-    stop_sampling.set()
-    sampler.join(timeout=2)
-    if tpu_sampler:
-        tpu_sampler.join(timeout=12)
 
     val_prob = np.asarray(jax.nn.sigmoid(forward(params, X_val)))
     test_prob = np.asarray(jax.nn.sigmoid(forward(params, X_test)))
@@ -283,6 +279,17 @@ def main():
     test_acc = np.mean(test_y == (test_prob >= 0.5))
     measured_wall_seconds = time.perf_counter() - wall_start
     cpu_seconds = time.process_time() - cpu_start
+    # LibTPU metrics refresh over a multi-second interval. Give a TPU-only
+    # sampler a short post-measurement window to return its first real sample;
+    # this wait is intentionally excluded from benchmark end-to-end time.
+    if tpu_sampler:
+        sample_deadline = time.monotonic() + 6.0
+        while not tpu_samples and time.monotonic() < sample_deadline:
+            time.sleep(0.1)
+    stop_sampling.set()
+    sampler.join(timeout=2)
+    if tpu_sampler:
+        tpu_sampler.join(timeout=6)
     payload = {"run_name": a.run_name, "dataset_rows": n_rows, "features": n_features, "epochs": a.epochs,
                "batch_size": a.batch_size, "steps": len(step_times), "compile_seconds": compile_seconds,
                "data_loading_seconds": data_loading_seconds, "device_transfer_seconds": device_transfer_seconds,
