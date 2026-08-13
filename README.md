@@ -27,6 +27,7 @@ flowchart TD
 | `Dockerfile` | Parameterized immutable CPU/GPU/TPU image recipe |
 | `infra/` | ConfigMap and reusable Kubernetes Jobs |
 | `scripts/` | Build, submission, and collection helpers |
+| `docs/ME344_Profiling_Analysis.ipynb` | Executable three-platform profiling analysis sourced from the formal JSON artifacts |
 | `data/Churn_Dataset.csv` | Original course dataset; mounted at runtime rather than copied into the image |
 | `results/` | Raw JSON/CSV/log evidence, the final three-row summary, and generated charts |
 
